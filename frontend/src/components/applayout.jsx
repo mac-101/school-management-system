@@ -3,11 +3,13 @@ import Sidebar from "../components/Sidebar";
 
 export default function AppLayout() {
   return (
-    <div className="min-h-screen flex bg-slate-50">
+    <div className="h-screen overflow-hidden bg-slate-50 flex">
       <Sidebar />
 
-      <main className="flex-1 p-8">
-        <Outlet />
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto p-8">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

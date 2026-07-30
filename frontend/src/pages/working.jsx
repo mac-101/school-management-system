@@ -2,14 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import StudentFilterBar from "../components/StudentFilterBar";
 import StudentTable from "../components/StudentTable";
-import { FILTERS, filterStudents } from "../utils/filters";
+import { FILTERS } from "../utils/filters";
 
 export default function StudentListPage() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -55,37 +54,19 @@ export default function StudentListPage() {
     return result;
   }, [students]);
 
-  // Students matching the currently active filter and the search text.
+  // Students matching the currently active filter — no re-fetching, just
+  // filtering the data already in state.
   const visibleStudents = useMemo(() => {
-    return filterStudents(students, activeFilter, searchTerm);
-  }, [students, activeFilter, searchTerm]);
+    const filter = FILTERS.find((f) => f.key === activeFilter) ?? FILTERS[0];
+    return students.filter(filter.test);
+  }, [students, activeFilter]);
 
   return (
     <>
-      <div className="sticky top-0 z-20 mb-4 bg-slate-50/95 py-4 backdrop-blur">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-800 mb-1">Students</h1>
-          <p className="text-sm text-slate-500 mb-4">
-            {students.length} student{students.length === 1 ? "" : "s"} across all classes
-          </p>
-        </div>
-        <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm">
-          <svg className="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path
-              fillRule="evenodd"
-              d="M8.5 3a5.5 5.5 0 104.28 9.4l3.72 3.72a.75.75 0 101.06-1.06l-3.72-3.72A5.5 5.5 0 008.5 3zM4 8.5a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <input
-            type="search"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Search students"
-            className="w-full sm:w-56 border-none bg-transparent outline-none placeholder:text-slate-400"
-          />
-        </label>
-      </div>
+      <h1 className="text-xl font-semibold text-slate-800 mb-1">Students</h1>
+      <p className="text-sm text-slate-500 mb-6">
+        {students.length} student{students.length === 1 ? "" : "s"} across all classes
+      </p>
 
       {loading && (
         <div className="flex items-center justify-center py-20 text-slate-400 text-sm">
@@ -107,15 +88,12 @@ export default function StudentListPage() {
 
       {!loading && !error && students.length > 0 && (
         <>
-          <div className="sticky top-24 z-10 mb-4 border-b border-slate-200 bg-slate-50/95 py-2 backdrop-blur">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <StudentFilterBar
-                counts={counts}
-                activeFilter={activeFilter}
-                onChange={setActiveFilter}
-              />
-            </div>
-          </div>
+          <StudentFilterBar
+            filters={FILTERS}
+            counts={counts}
+            activeFilter={activeFilter}
+            onChange={setActiveFilter}
+          />
           <StudentTable
             students={visibleStudents}
             onEdit={handleEdit}

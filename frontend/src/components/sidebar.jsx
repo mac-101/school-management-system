@@ -10,7 +10,7 @@ const navItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="w-56 bg-[#0A2472] text-white flex flex-col justify-between py-6">
+    <aside className="relative z-30 flex h-screen w-56 shrink-0 flex-col justify-between bg-[#0A2472] py-6 text-white">
       <div>
         <div className="px-6 mb-8 text-lg font-semibold">
           Logo

@@ -5,7 +5,7 @@ import AuthPage from "./pages/auth";
 import AppLayout from "./components/applayout";
 
 import Dashboard from "./pages/Dashboard";
-// import Students from "./pages/Students";
+import StudentListPage from "./pages/StudentListPage";
 // import Staff from "./pages/Staff";
 // import Timetable from "./pages/Timetable";
 // import Schemes from "./pages/Schemes";
@@ -20,8 +20,8 @@ export default function App() {
         {/* Protected/Layout routes */}
         <Route element={<AppLayout />}>
           <Route path="/" element={<Dashboard />} />
-          {/* <Route path="/students" element={<Students />} />
-          <Route path="/staff" element={<Staff />} />
+          <Route path="/students" element={<StudentListPage />} />
+          {/* <Route path="/staff" element={<Staff />} />
           <Route path="/timetable" element={<Timetable />} />
           <Route path="/schemes" element={<Schemes />} /> */}
         </Route>
