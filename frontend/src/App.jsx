@@ -1,28 +1,31 @@
-import { useState, useEffect } from 'react'
-import AuthPage from './pages/auth'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import AuthPage from "./pages/auth";
 
-function App() {
+import AppLayout from "./components/applayout";
 
-  useEffect(()=>{
-    async function fetchData() {
-      console.log(import.meta.env.VITE_API_URL)
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}`)
-        if (!response.ok) {
-          throw new Error('Network')
-        }
-      } catch (error) {
-        
-      }
-    }
-  })
+import Dashboard from "./pages/Dashboard";
+// import Students from "./pages/Students";
+// import Staff from "./pages/Staff";
+// import Timetable from "./pages/Timetable";
+// import Schemes from "./pages/Schemes";
 
+export default function App() {
   return (
-    <>
-    <AuthPage/>
-    </>
-  )
-}
+    <BrowserRouter>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/auth" element={<AuthPage />} />
 
-export default App
+        {/* Protected/Layout routes */}
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<Dashboard />} />
+          {/* <Route path="/students" element={<Students />} />
+          <Route path="/staff" element={<Staff />} />
+          <Route path="/timetable" element={<Timetable />} />
+          <Route path="/schemes" element={<Schemes />} /> */}
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}

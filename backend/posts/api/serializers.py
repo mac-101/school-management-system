@@ -1,11 +1,7 @@
 from rest_framework.serializers import ModelSerializer
-from ..models import Post, User
+from rest_framework import serializers
+from ..models import User, Student
 
-
-class PostSerializers(ModelSerializer):
-    class Meta:
-        model = Post
-        fields = ['id','title','body']
         
 class RegisterSerializer(ModelSerializer):
 
@@ -26,3 +22,10 @@ class RegisterSerializer(ModelSerializer):
         )
 
         return user
+    
+class StudentSerializer(ModelSerializer):
+    fee_balance = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Student
+        fields = "__all__"

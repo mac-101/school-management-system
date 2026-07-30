@@ -42,7 +42,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "corsheaders.middleware.CorsMiddleware",
-
     "django.middleware.security.SecurityMiddleware",
 ]
 
@@ -103,6 +102,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    
 }
 
 AUTH_USER_MODEL = "posts.User"
