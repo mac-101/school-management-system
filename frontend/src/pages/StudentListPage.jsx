@@ -42,8 +42,15 @@ export default function StudentListPage() {
     console.log("Edit student", student);
   };
 
-  const handleDelete = (student) => {
-    console.log("Delete student", student);
+  const handleDelete = async (student) => {
+    try {
+      setError(null);
+      await axios.delete(`${import.meta.env.VITE_API_URL}students/${student.id}/`);
+      setStudents((prevStudents) => prevStudents.filter((item) => item.id !== student.id));
+      alert(`Student ${student.first_name} ${student.last_name} deleted successfully.`);
+    } catch (err) {
+      setError("Could not delete student. Please try again.");
+    }
   };
 
   // Count of students matching each filter, computed once per students change.
@@ -62,29 +69,50 @@ export default function StudentListPage() {
 
   return (
     <>
-      <div className="sticky top-0 z-20 mb-4 bg-slate-50/95 py-4 backdrop-blur">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-800 mb-1">Students</h1>
-          <p className="text-sm text-slate-500 mb-4">
-            {students.length} student{students.length === 1 ? "" : "s"} across all classes
-          </p>
+      <div className="sticky top-0 z-20 bg-slate-50/95 py-4 backdrop-blur">
+
+        <div className=" flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-xl font-semibold text-slate-800 mb-1">Students</h1>
+            <p className="text-sm text-slate-500 mb-4">
+              {students.length} student{students.length === 1 ? "" : "s"} across all classes
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+
+            <div className="relative w-full sm:w-72">
+              <svg
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0a7.5 7.5 0 10-10.6 0 7.5 7.5 0 0010.6 0z" />
+              </svg>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search staff by name, email or phone..."
+                className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:border-[#0A2472] focus:ring-1 focus:ring-[#0A2472]/30"
+              />
+            </div>
+            <button className="bg-[#0A2472] text-white text-sm font-medium px-4 py-2 rounded-lg whitespace-nowrap">
+              + Add Student
+            </button>
+
+          </div>
         </div>
-        <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm">
-          <svg className="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path
-              fillRule="evenodd"
-              d="M8.5 3a5.5 5.5 0 104.28 9.4l3.72 3.72a.75.75 0 101.06-1.06l-3.72-3.72A5.5 5.5 0 008.5 3zM4 8.5a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0z"
-              clipRule="evenodd"
+        {!loading && !error && (
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <StudentFilterBar
+              counts={counts}
+              activeFilter={activeFilter}
+              onChange={setActiveFilter}
             />
-          </svg>
-          <input
-            type="search"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Search students"
-            className="w-full sm:w-56 border-none bg-transparent outline-none placeholder:text-slate-400"
-          />
-        </label>
+          </div>
+        )}
       </div>
 
       {loading && (
@@ -107,15 +135,6 @@ export default function StudentListPage() {
 
       {!loading && !error && students.length > 0 && (
         <>
-          <div className="sticky top-24 z-10 mb-4 border-b border-slate-200 bg-slate-50/95 py-2 backdrop-blur">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <StudentFilterBar
-                counts={counts}
-                activeFilter={activeFilter}
-                onChange={setActiveFilter}
-              />
-            </div>
-          </div>
           <StudentTable
             students={visibleStudents}
             onEdit={handleEdit}

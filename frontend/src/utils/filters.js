@@ -1,5 +1,8 @@
+import { isTeacher, isAdministrator, isSupportStaff } from "./staffHelpers";
+
 // Central filter definitions. Add a new filter by adding one entry here —
 // the toolbar and the filtering logic both read from this list.
+
 export const FILTERS = [
   { key: "all", label: "All Students", test: () => true },
   { key: "primary", label: "Primary", test: (s) => s.level === "Primary" },
@@ -60,3 +63,16 @@ export function filterStudents(students, activeFilter, searchTerm) {
     return searchableText.includes(normalizedSearch);
   });
 }
+
+
+// Single source of truth for the filter tabs — bar and counts both read this.
+export const STAFF_FILTERS = [
+  { key: "all", label: "All", test: () => true },
+  { key: "teachers", label: "Teachers", test: isTeacher },
+  { key: "administrators", label: "Administrators", test: isAdministrator },
+  { key: "support", label: "Support Staff", test: isSupportStaff },
+  { key: "fulltime", label: "Full-time", test: (s) => s.employment_type === "Full Time" },
+  { key: "parttime", label: "Part-time", test: (s) => s.employment_type === "Part Time" },
+  { key: "active", label: "Active", test: (s) => s.status === "Active" },
+  { key: "inactive", label: "Inactive", test: (s) => s.status === "Inactive" },
+];

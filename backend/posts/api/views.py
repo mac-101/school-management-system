@@ -15,7 +15,14 @@ class ProfileView(APIView):
             "email": request.user.email,
         })
 
-class StudentListAPIView(generics.ListAPIView):
+class StudentListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Student.objects.all().order_by("level", "grade", "last_name")
+    serializer_class = StudentSerializer
+
+
+class StudentRetrieveUpdateDestroyAPIView(
+    generics.RetrieveUpdateDestroyAPIView
+):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
 

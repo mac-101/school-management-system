@@ -36,7 +36,7 @@ class Student(models.Model):
     )
 
     grade = models.PositiveSmallIntegerField()
-
+    
     student_fee = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -67,3 +67,4 @@ class Student(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+    
