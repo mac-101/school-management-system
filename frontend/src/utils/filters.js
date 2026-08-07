@@ -73,6 +73,6 @@ export const STAFF_FILTERS = [
   { key: "support", label: "Support Staff", test: isSupportStaff },
   { key: "fulltime", label: "Full-time", test: (s) => s.employment_type === "Full Time" },
   { key: "parttime", label: "Part-time", test: (s) => s.employment_type === "Part Time" },
-  { key: "active", label: "Active", test: (s) => s.status === "Active" },
-  { key: "inactive", label: "Inactive", test: (s) => s.status === "Inactive" },
+  { key: "active", label: "Active", test: (s) => s.is_active === true },
+  { key: "inactive", label: "Inactive", test: (s) => s.is_active === false },
 ];

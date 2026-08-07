@@ -1,5 +1,5 @@
 export default function StatusBadge({ status }) {
-  const isActive = status === "Active";
+  const isActive = status === true ;
   return (
     <span
       className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full ${

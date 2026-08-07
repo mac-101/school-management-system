@@ -7,6 +7,7 @@ import AppLayout from "./components/applayout";
 import Dashboard from "./pages/Dashboard";
 import StudentListPage from "./pages/StudentListPage";
 import Staff from "./pages/StaffPage";
+import StaffDetailPage from "./pages/StaffDetailPage";
 // import Timetable from "./pages/Timetable";
 // import Schemes from "./pages/Schemes";
 
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/students" element={<StudentListPage />} />
           <Route path="/staff" element={<Staff />} />
+          <Route path="/staff/:id" element={<StaffDetailPage />} />
           {/* <Route path="/timetable" element={<Timetable />} />
           <Route path="/schemes" element={<Schemes />} /> */}
         </Route>

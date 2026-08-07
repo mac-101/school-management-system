@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import StudentFormModal from "../components/StudentFormModal";
 import StudentFilterBar from "../components/StudentFilterBar";
 import StudentTable from "../components/StudentTable";
 import { FILTERS, filterStudents } from "../utils/filters";
@@ -10,36 +11,55 @@ export default function StudentListPage() {
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingStudent, setEditingStudent] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const fetchStudents = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}students/`);
+      console.log(res.data);
+      setStudents(res.data);
+    } catch (err) {
+      setError("Could not load students. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function fetchStudents() {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}students/`);
-
-        console.log(res.data);
-        setStudents(res.data);
-
-        if (!cancelled) setStudents(res.data);
-      } catch (err) {
-        if (!cancelled) setError("Could not load students. Please try again.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
     fetchStudents();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
-  // Placeholders — wire these up to your edit/delete flows (modal, API calls, etc.)
+   useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(id);
+  }, [toast]);
+ 
+  const handleAddStudent = () => {
+    setEditingStudent(null);
+    setModalOpen(true);
+  };
+ 
   const handleEdit = (student) => {
-    console.log("Edit student", student);
+    setEditingStudent(student);
+    setModalOpen(true);
+  };
+ 
+  const handleModalClose = () => {
+    setModalOpen(false);
+    setEditingStudent(null);
+  };
+ 
+  const handleSaved = (message) => {
+    setModalOpen(false);
+    setEditingStudent(null);
+    setToast(message);
+    fetchStudents();
   };
 
   const handleDelete = async (student) => {
@@ -98,7 +118,7 @@ export default function StudentListPage() {
                 className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:border-[#0A2472] focus:ring-1 focus:ring-[#0A2472]/30"
               />
             </div>
-            <button className="bg-[#0A2472] text-white text-sm font-medium px-4 py-2 rounded-lg whitespace-nowrap">
+            <button onClick={handleAddStudent} className="bg-[#0A2472] text-white text-sm font-medium px-4 py-2 rounded-lg whitespace-nowrap">
               + Add Student
             </button>
 
@@ -141,6 +161,22 @@ export default function StudentListPage() {
             onDelete={handleDelete}
           />
         </>
+      )}
+
+      {modalOpen && (
+        <StudentFormModal
+          key={editingStudent?.id ?? "new"}
+          open={modalOpen}
+          student={editingStudent}
+          onClose={handleModalClose}
+          onSaved={handleSaved}
+        />
+      )}
+
+      {toast && (
+        <div className="fixed bottom-4 right-4 bg-[#0A2472] text-white px-4 py-2 rounded-lg shadow-lg">
+          {toast}
+        </div>
       )}
     </>
   );

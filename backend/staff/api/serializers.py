@@ -9,12 +9,15 @@ class SubjectSerializer(serializers.ModelSerializer):
 
 
 class TeachingAssignmentSerializer(serializers.ModelSerializer):
-    subject = SubjectSerializer()
+    # accept subject as a PK on write, return PK on read (frontend will fetch subject list separately)
+    subject = serializers.PrimaryKeyRelatedField(queryset=Subject.objects.all())
+    teacher = serializers.PrimaryKeyRelatedField(queryset=Staff.objects.all())
 
     class Meta:
         model = TeachingAssignment
         fields = [
             "id",
+            "teacher",
             "subject",
             "level",
             "grade",
@@ -22,9 +25,14 @@ class TeachingAssignmentSerializer(serializers.ModelSerializer):
 
 
 class ClassModeratorSerializer(serializers.ModelSerializer):
+    # include teacher so we can create/update/delete by API
+    teacher = serializers.PrimaryKeyRelatedField(queryset=Staff.objects.all())
+
     class Meta:
         model = ClassModerator
         fields = [
+            "id",
+            "teacher",
             "level",
             "grade",
         ]

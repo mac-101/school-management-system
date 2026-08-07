@@ -1,4 +1,3 @@
-import { useState } from "react";
 import StatusBadge from "./StatusBadge";
 import {
   isTeacher,
@@ -12,7 +11,6 @@ export default function StaffCard({ staff, onView, onEdit, onDelete }) {
   const teacher = isTeacher(staff);
   const subjects = teacher ? getSubjectNames(staff) : [];
   const classes = teacher ? getClassLabels(staff) : [];
-  const [showAllSubjects, setShowAllSubjects] = useState(false);
   const moderatorLabel = staff.class_moderator
     ? `${staff.class_moderator.level} ${staff.class_moderator.grade}`
     : null;
@@ -28,7 +26,7 @@ export default function StaffCard({ staff, onView, onEdit, onDelete }) {
           <p className="font-medium text-slate-800 truncate">{getFullName(staff)}</p>
           <p className="text-sm text-slate-500">{staff.role}</p>
         </div>
-        <StatusBadge status={staff.status} />
+        <StatusBadge status={staff.is_active} />
       </div>
 
       {/* Employment type */}
@@ -40,51 +38,38 @@ export default function StaffCard({ staff, onView, onEdit, onDelete }) {
 
       {/* Contact */}
       <div className="text-sm text-slate-600 space-y-1 mb-4">
-        <p className="truncate">{staff.phone}</p>
+        <p className="truncate">{staff.phone_number}</p>
         <p className="truncate">{staff.email}</p>
       </div>
 
 
 
       {/* Teaching info */}
-      <div>
-        {teacher && (
-          <>
-            <button
-              onClick={() => setShowAllSubjects(!showAllSubjects)}
-              className="text-[#0A2472] hover:underline text-xs font-medium"
-            >
-              {showAllSubjects ? "Show Less" : "Show More"}
-            </button>
+      {/* {teacher && (subjects.length > 0 || classes.length > 0) && (
+        <div className="mb-4 rounded-lg border border-slate-100 bg-slate-50 p-3">
+          {subjects.length > 0 && (
+            <div>
+              <p className="mb-1 text-xs font-medium text-slate-500">Subjects</p>
+              <ul className="space-y-0.5 text-sm text-slate-700">
+                {subjects.map((name) => (
+                  <li key={name}>• {name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-            {showAllSubjects && (subjects.length > 0 || classes.length > 0) && (
-              <div className="border-t border-slate-100 pt-3 mb-3 space-y-2">
-                {subjects.length > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-slate-500 mb-1">Subjects</p>
-                    <ul className="text-sm text-slate-700 space-y-0.5">
-                      {subjects.map((name) => (
-                        <li key={name}>• {name}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {classes.length > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-slate-500 mb-1">Classes</p>
-                    <ul className="text-sm text-slate-700 space-y-0.5">
-                      {classes.map((label) => (
-                        <li key={label}>• {label}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
-      </div>
+          {classes.length > 0 && (
+            <div className="mt-2">
+              <p className="mb-1 text-xs font-medium text-slate-500">Classes</p>
+              <ul className="space-y-0.5 text-sm text-slate-700">
+                {classes.map((label) => (
+                  <li key={label}>• {label}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )} */}
 
       {/* Class moderator */}
       {moderatorLabel && (
