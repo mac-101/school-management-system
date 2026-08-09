@@ -28,7 +28,6 @@ class Staff(models.Model):
         ("Part Time", "Part Time"),
         ("Contract", "Contract"),
     ]
-
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     age = models.PositiveSmallIntegerField()
@@ -67,7 +66,6 @@ class Staff(models.Model):
         return f"{self.first_name} {self.last_name}"
     
 class Subject(models.Model):
-
     name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
@@ -81,7 +79,7 @@ class TeachingAssignment(models.Model):
         ("JSS", "JSS"),
         ("SSS", "SSS"),
     ]
-
+    
     teacher = models.ForeignKey(
         Staff,
         on_delete=models.CASCADE,
@@ -104,7 +102,6 @@ class TeachingAssignment(models.Model):
         return f"{self.teacher} - {self.subject} ({self.level} {self.grade})"
     
 class ClassModerator(models.Model):
-
     LEVEL_CHOICES = [
         ("Primary", "Primary"),
         ("JSS", "JSS"),

@@ -80,36 +80,36 @@ INSERT INTO staff_staff (id, first_name, last_name, age, gender, role, employmen
 -- ==================================================
 -- TABLE 2: staff_subject
 -- ==================================================
-INSERT INTO staff_subject (id, name) VALUES (1, 'English Language');
-INSERT INTO staff_subject (id, name) VALUES (2, 'Mathematics');
-INSERT INTO staff_subject (id, name) VALUES (3, 'Basic Science');
-INSERT INTO staff_subject (id, name) VALUES (4, 'Basic Technology');
-INSERT INTO staff_subject (id, name) VALUES (5, 'Social Studies');
-INSERT INTO staff_subject (id, name) VALUES (6, 'Civic Education');
-INSERT INTO staff_subject (id, name) VALUES (7, 'Agricultural Science');
-INSERT INTO staff_subject (id, name) VALUES (8, 'Computer Studies');
-INSERT INTO staff_subject (id, name) VALUES (9, 'Physical and Health Education');
-INSERT INTO staff_subject (id, name) VALUES (10, 'Business Studies');
-INSERT INTO staff_subject (id, name) VALUES (11, 'Home Economics');
-INSERT INTO staff_subject (id, name) VALUES (12, 'French');
-INSERT INTO staff_subject (id, name) VALUES (13, 'Yoruba');
-INSERT INTO staff_subject (id, name) VALUES (14, 'Igbo');
-INSERT INTO staff_subject (id, name) VALUES (15, 'Hausa');
-INSERT INTO staff_subject (id, name) VALUES (16, 'Physics');
-INSERT INTO staff_subject (id, name) VALUES (17, 'Chemistry');
-INSERT INTO staff_subject (id, name) VALUES (18, 'Biology');
-INSERT INTO staff_subject (id, name) VALUES (19, 'Economics');
-INSERT INTO staff_subject (id, name) VALUES (20, 'Government');
-INSERT INTO staff_subject (id, name) VALUES (21, 'Literature in English');
-INSERT INTO staff_subject (id, name) VALUES (22, 'Further Mathematics');
-INSERT INTO staff_subject (id, name) VALUES (23, 'Financial Accounting');
-INSERT INTO staff_subject (id, name) VALUES (24, 'Commerce');
-INSERT INTO staff_subject (id, name) VALUES (25, 'Christian Religious Studies');
-INSERT INTO staff_subject (id, name) VALUES (26, 'Islamic Religious Studies');
-INSERT INTO staff_subject (id, name) VALUES (27, 'Geography');
-INSERT INTO staff_subject (id, name) VALUES (28, 'History');
-INSERT INTO staff_subject (id, name) VALUES (29, 'Visual Arts');
-INSERT INTO staff_subject (id, name) VALUES (30, 'Music');
+INSERT INTO staff_subject (name) VALUES ('English Language');
+INSERT INTO staff_subject (name) VALUES ('Mathematics');
+INSERT INTO staff_subject (name) VALUES ('Basic Science');
+INSERT INTO staff_subject (name) VALUES ('Basic Technology');
+INSERT INTO staff_subject (name) VALUES ('Social Studies');
+INSERT INTO staff_subject (name) VALUES ('Civic Education');
+INSERT INTO staff_subject (name) VALUES ('Agricultural Science');
+INSERT INTO staff_subject (name) VALUES ('Computer Studies');
+INSERT INTO staff_subject (name) VALUES ('Physical and Health Education');
+INSERT INTO staff_subject (name) VALUES ('Business Studies');
+INSERT INTO staff_subject (name) VALUES ('Home Economics');
+INSERT INTO staff_subject (name) VALUES ('French');
+INSERT INTO staff_subject (name) VALUES ('Yoruba');
+INSERT INTO staff_subject (name) VALUES ('Igbo');
+INSERT INTO staff_subject (name) VALUES ('Hausa');
+INSERT INTO staff_subject (name) VALUES ('Physics');
+INSERT INTO staff_subject (name) VALUES ('Chemistry');
+INSERT INTO staff_subject (name) VALUES ('Biology');
+INSERT INTO staff_subject (name) VALUES ('Economics');
+INSERT INTO staff_subject (name) VALUES ('Government');
+INSERT INTO staff_subject (name) VALUES ('Literature in English');
+INSERT INTO staff_subject (name) VALUES ('Further Mathematics');
+INSERT INTO staff_subject (name) VALUES ('Financial Accounting');
+INSERT INTO staff_subject (name) VALUES ('Commerce');
+INSERT INTO staff_subject (name) VALUES ('Christian Religious Studies');
+INSERT INTO staff_subject (name) VALUES ('Islamic Religious Studies');
+INSERT INTO staff_subject (name) VALUES ('Geography');
+INSERT INTO staff_subject (name) VALUES ('History');
+INSERT INTO staff_subject (name) VALUES ('Visual Arts');
+INSERT INTO staff_subject (name) VALUES ('Music');
 
 -- ==================================================
 -- TABLE 3: staff_teachingassignment
