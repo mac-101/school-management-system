@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'posts',
     'staff',
+    'scheme',
 ]
 
 CORS_ALLOWED_ORIGINS = ("http://localhost:5173",)

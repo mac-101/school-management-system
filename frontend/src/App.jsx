@@ -8,8 +8,8 @@ import Dashboard from "./pages/Dashboard";
 import StudentListPage from "./pages/StudentListPage";
 import Staff from "./pages/StaffPage";
 import StaffDetailPage from "./pages/StaffDetailPage";
-// import Timetable from "./pages/Timetable";
-// import Schemes from "./pages/Schemes";
+import SchemeDetailPage from "./pages/SchemeDetailPage";
+import SchemePage from "./pages/SchemePage";
 
 export default function App() {
   return (
@@ -24,8 +24,8 @@ export default function App() {
           <Route path="/students" element={<StudentListPage />} />
           <Route path="/staff" element={<Staff />} />
           <Route path="/staff/:id" element={<StaffDetailPage />} />
-          {/* <Route path="/timetable" element={<Timetable />} />
-          <Route path="/schemes" element={<Schemes />} /> */}
+          <Route path="/schemes" element={<SchemePage />} />
+          <Route path="/schemes/:id" element={<SchemeDetailPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
