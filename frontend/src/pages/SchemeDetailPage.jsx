@@ -50,6 +50,19 @@ export default function SchemeDetailPage() {
     fetchScheme();
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this scheme? This action cannot be undone.")) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}schemes/${id}/`);
+      navigate("/schemes");
+    } catch (err) {
+      setError("Could not delete this scheme. Please try again.");
+    }
+  };
+
   return (
     <div>
       <button
@@ -76,7 +89,7 @@ export default function SchemeDetailPage() {
 
       {!loading && !error && scheme && (
         <div className="max-w-2xl mx-auto">
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-end mb-4 gap-2">
             <button
               onClick={() => setModalOpen(true)}
               className="text-sm font-medium text-[#0A2472] border border-[#0A2472]/20 px-3 py-1.5 rounded-lg hover:bg-[#0A2472]/5 whitespace-nowrap"
@@ -85,9 +98,15 @@ export default function SchemeDetailPage() {
             </button>
             <button
               onClick={() => downloadSchemeDoc(scheme)}
-              className="ml-2 text-sm font-medium text-[#0A2472] border border-[#0A2472]/20 px-3 py-1.5 rounded-lg hover:bg-[#0A2472]/5 whitespace-nowrap"
+              className="text-sm font-medium text-[#0A2472] border border-[#0A2472]/20 px-3 py-1.5 rounded-lg hover:bg-[#0A2472]/5 whitespace-nowrap"
             >
               Download Document
+            </button>
+            <button
+              onClick={handleDelete}
+              className="text-sm font-medium text-red-600 border border-red-600/20 px-3 py-1.5 rounded-lg hover:bg-red-600/5 whitespace-nowrap"
+            >
+              Delete Scheme
             </button>
           </div>
 

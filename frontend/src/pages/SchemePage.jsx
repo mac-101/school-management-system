@@ -77,6 +77,20 @@ export default function SchemePage() {
     fetchSchemes();
   };
 
+  const handleDeleteScheme = async (schemeId, schemeName) => {
+    if (!window.confirm(`Delete "${schemeName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}schemes/${schemeId}/`);
+      setToast("Scheme deleted successfully.");
+      fetchSchemes();
+    } catch (err) {
+      setToast("Could not delete this scheme. Please try again.");
+    }
+  };
+
   // Filter by term first, then group by "Level Grade" (e.g. "JSS 1").
   const termSchemes = useMemo(
     () => schemes.filter((s) => s.term === activeTerm),
@@ -204,19 +218,32 @@ export default function SchemePage() {
 
           <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
             {activeGroup.schemes.map((scheme) => (
-              <button
+              <div
                 key={scheme.id}
-                onClick={() => goToScheme(scheme.id)}
-                className="w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-slate-50 border-b border-slate-100 last:border-b-0"
+                className="flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 border-b border-slate-100 last:border-b-0 group"
               >
-                <span className="text-sm text-slate-700">{scheme.subject_name}</span>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-slate-400">
-                    {(scheme.weeks || []).length} weeks
-                  </span>
-                  <ChevronRight />
-                </div>
-              </button>
+                <button
+                  onClick={() => goToScheme(scheme.id)}
+                  className="flex-1 flex items-center justify-between gap-3 text-left"
+                >
+                  <span className="text-sm text-slate-700">{scheme.subject_name}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-slate-400">
+                      {(scheme.weeks || []).length} weeks
+                    </span>
+                    <ChevronRight />
+                  </div>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteScheme(scheme.id, scheme.subject_name);
+                  }}
+                  className="ml-2 opacity-0 group-hover:opacity-100 text-red-600 hover:text-red-700 text-xs font-medium px-2 py-1 rounded hover:bg-red-50 transition-all"
+                >
+                  Delete
+                </button>
+              </div>
             ))}
           </div>
         </div>

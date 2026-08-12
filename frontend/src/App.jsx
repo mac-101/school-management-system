@@ -10,6 +10,7 @@ import Staff from "./pages/StaffPage";
 import StaffDetailPage from "./pages/StaffDetailPage";
 import SchemeDetailPage from "./pages/SchemeDetailPage";
 import SchemePage from "./pages/SchemePage";
+import TimetablePage from "./pages/TimetablePage";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/staff/:id" element={<StaffDetailPage />} />
           <Route path="/schemes" element={<SchemePage />} />
           <Route path="/schemes/:id" element={<SchemeDetailPage />} />
+          <Route path="/timetable" element={<TimetablePage />} />
         </Route>
       </Routes>
     </BrowserRouter>
