@@ -7,8 +7,15 @@ from .serializers import (
     PeriodSerializer,
 )
 
-class PeriodListAPIView(generics.ListAPIView):
+class PeriodListAPIView(generics.ListCreateAPIView):
     queryset = Period.objects.all().order_by("order")
+    serializer_class = PeriodSerializer
+
+
+class PeriodRetrieveUpdateDestroyAPIView(
+    generics.RetrieveUpdateDestroyAPIView
+):
+    queryset = Period.objects.all()
     serializer_class = PeriodSerializer
     
 class ClassRoomListAPIView(generics.ListAPIView):

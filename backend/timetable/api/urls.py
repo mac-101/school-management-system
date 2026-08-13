@@ -3,6 +3,7 @@ from django.urls import path
 from .views import (
     ClassRoomListAPIView,
     PeriodListAPIView,
+    PeriodRetrieveUpdateDestroyAPIView,
     TimetableListCreateAPIView,
     TimetableRetrieveUpdateDestroyAPIView,
 )
@@ -18,6 +19,12 @@ urlpatterns = [
         "periods/",
         PeriodListAPIView.as_view(),
         name="period-list",
+    ),
+
+    path(
+        "periods/<int:pk>/",
+        PeriodRetrieveUpdateDestroyAPIView.as_view(),
+        name="period-detail",
     ),
 
     path(

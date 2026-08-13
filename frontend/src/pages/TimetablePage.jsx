@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import TimetableGrid from "../components/TimetableGrid";
 import TimetableFormModal from "../components/TimetableFormModal";
+import PeriodsModal from "../components/PeriodsModal";
+
 import {
+  DAYS,
   LEVELS,
-  classroomLabel,
   classroomSortValue,
   isActiveTeacher,
 } from "../utils/timetableHelpers";
@@ -19,35 +21,54 @@ export default function TimetablePage() {
   const [teachers, setTeachers] = useState([]);
 
   const [selectedLevel, setSelectedLevel] = useState("All");
-  const [selectedClass, setSelectedClass] = useState(""); // classroom id, string
+  const [selectedDay, setSelectedDay] = useState("All");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
   const [prefill, setPrefill] = useState(null);
+  const [periodsModalOpen, setPeriodsModalOpen] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [toast, setToast] = useState(null);
 
+  // --------------------------------------------------
+  // FETCH EVERYTHING
+  // --------------------------------------------------
+
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setError(null);
+
     try {
-      const [timetableRes, classroomsRes, periodsRes, subjectsRes, staffRes] = await Promise.all([
+      const [
+        timetableRes,
+        classroomsRes,
+        periodsRes,
+        subjectsRes,
+        staffRes,
+      ] = await Promise.all([
         axios.get(`${API}timetable/`),
         axios.get(`${API}timetable/classes/`),
         axios.get(`${API}timetable/periods/`),
         axios.get(`${API}subjects/`),
         axios.get(`${API}staff/`),
       ]);
+
       setTimetable(timetableRes.data);
       setClassrooms(classroomsRes.data);
       setPeriods(periodsRes.data);
       setSubjects(subjectsRes.data);
-      setTeachers(staffRes.data.filter(isActiveTeacher));
+      setTeachers(
+        staffRes.data.filter(isActiveTeacher)
+      );
     } catch (err) {
-      setError("Could not load the timetable. Please try again.");
+      console.error(err);
+
+      setError(
+        "Could not load the timetable. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -57,48 +78,89 @@ export default function TimetablePage() {
     fetchAll();
   }, [fetchAll]);
 
-  // Auto-dismiss the success toast.
+  // --------------------------------------------------
+  // AUTO-DISMISS TOAST
+  // --------------------------------------------------
+
   useEffect(() => {
     if (!toast) return;
-    const id = setTimeout(() => setToast(null), 3000);
+
+    const id = setTimeout(() => {
+      setToast(null);
+    }, 3000);
+
     return () => clearTimeout(id);
   }, [toast]);
 
-  // Classrooms available under the selected level, in curriculum order.
+  // --------------------------------------------------
+  // CLASSROOMS FOR CURRENT LEVEL
+  // --------------------------------------------------
+
   const visibleClassrooms = useMemo(() => {
     const filtered =
       selectedLevel === "All"
         ? classrooms
-        : classrooms.filter((c) => c.level === selectedLevel);
-    return [...filtered].sort((a, b) => classroomSortValue(a) - classroomSortValue(b));
+        : classrooms.filter(
+          (classroom) =>
+            classroom.level === selectedLevel
+        );
+
+    return [...filtered].sort(
+      (a, b) =>
+        classroomSortValue(a) -
+        classroomSortValue(b)
+    );
   }, [classrooms, selectedLevel]);
 
-  // Keep the class dropdown pointed at a valid classroom whenever the level
-  // filter changes or classrooms first load.
-  useEffect(() => {
-    const stillValid = visibleClassrooms.some((c) => String(c.id) === selectedClass);
-    if (!stillValid) {
-      setSelectedClass(visibleClassrooms[0] ? String(visibleClassrooms[0].id) : "");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleClassrooms]);
+  // --------------------------------------------------
+  // TIMETABLE ENTRIES FOR VISIBLE CLASSROOMS
+  // --------------------------------------------------
 
-  const entriesForClass = useMemo(() => {
-    if (!selectedClass) return [];
-    return timetable.filter((e) => String(e.classroom) === selectedClass);
-  }, [timetable, selectedClass]);
+  const visibleEntries = useMemo(() => {
+    const classroomIds = new Set(
+      visibleClassrooms.map(
+        (classroom) => String(classroom.id)
+      )
+    );
+
+    return timetable.filter((entry) =>
+      classroomIds.has(String(entry.classroom))
+    );
+  }, [timetable, visibleClassrooms]);
+
+  // --------------------------------------------------
+  // ADD TIMETABLE ENTRY
+  // --------------------------------------------------
 
   const openAddModal = () => {
     setEditingEntry(null);
-    setPrefill(selectedClass ? { classroom: Number(selectedClass) } : null);
+    setPrefill(null);
     setModalOpen(true);
   };
 
-  const openCellModal = (day, periodId) => {
+  // --------------------------------------------------
+  // CLICK EMPTY CELL
+  // --------------------------------------------------
+
+  const openCellModal = (
+    classroom,
+    day,
+    periodId
+  ) => {
     setEditingEntry(null);
-    setPrefill({ classroom: Number(selectedClass), day, period: periodId });
+
+    setPrefill({
+      classroom: Number(classroom.id),
+      day,
+      period: Number(periodId),
+    });
+
     setModalOpen(true);
   };
+
+  // --------------------------------------------------
+  // EDIT EXISTING ENTRY
+  // --------------------------------------------------
 
   const openEditModal = (entry) => {
     setEditingEntry(entry);
@@ -106,91 +168,167 @@ export default function TimetablePage() {
     setModalOpen(true);
   };
 
+  // --------------------------------------------------
+  // CLOSE MODAL
+  // --------------------------------------------------
+
   const closeModal = () => {
     setModalOpen(false);
     setEditingEntry(null);
     setPrefill(null);
   };
 
+  // --------------------------------------------------
+  // AFTER SAVE
+  // --------------------------------------------------
+
   const handleSaved = (isEditMode) => {
     closeModal();
-    setToast(isEditMode ? "Timetable entry updated." : "Timetable entry added.");
+
+    setToast(
+      isEditMode
+        ? "Timetable entry updated."
+        : "Timetable entry added."
+    );
+
     fetchAll();
   };
 
+  // --------------------------------------------------
+  // DELETE
+  // --------------------------------------------------
+
   const handleDelete = async (entry) => {
     const label = `${entry.subject_name} on ${entry.day}`;
-    if (!window.confirm(`Remove ${label}? This cannot be undone.`)) return;
+
+    if (
+      !window.confirm(
+        `Remove ${label}? This cannot be undone.`
+      )
+    ) {
+      return;
+    }
 
     setDeletingId(entry.id);
+
     try {
-      await axios.delete(`${API}timetable/${entry.id}/`);
-      setTimetable((prev) => prev.filter((e) => e.id !== entry.id));
+      await axios.delete(
+        `${API}timetable/${entry.id}/`
+      );
+
+      setTimetable((prev) =>
+        prev.filter(
+          (item) => item.id !== entry.id
+        )
+      );
+
       setToast("Timetable entry removed.");
     } catch (err) {
-      setToast("Could not remove this entry. Please try again.");
+      console.error(err);
+
+      setToast(
+        "Could not remove this entry. Please try again."
+      );
     } finally {
       setDeletingId(null);
     }
   };
 
-  const selectedClassroom = classrooms.find((c) => String(c.id) === selectedClass);
+  // --------------------------------------------------
+  // RENDER
+  // --------------------------------------------------
 
   return (
     <div>
+      {/* -------------------------------------------- */}
+      {/* PAGE HEADER */}
+      {/* -------------------------------------------- */}
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-slate-800 mb-1">Timetable</h1>
+          <h1 className="text-xl font-semibold text-slate-800 mb-1">
+            Timetable
+          </h1>
+
           <p className="text-sm text-slate-500">
-            View and manage class timetables across the school.
+            View and manage class timetables across
+            the school.
           </p>
         </div>
+        <div className="flex items-center gap-2">
         <button
           onClick={openAddModal}
           className="bg-[#0A2472] text-white text-sm font-medium px-4 py-2 rounded-lg whitespace-nowrap"
         >
           + Add Timetable
         </button>
+        <button
+          onClick={() => setPeriodsModalOpen(true)}
+          className="ml-3 bg-white border border-slate-200 text-sm font-medium px-3 py-2 rounded-lg"
+        >
+          Manage Periods
+        </button>
+        </div>
       </div>
 
-      {/* Level + class filters */}
-      <div className="flex flex-col sm:flex-row sm:items-end gap-4 mb-6">
+      {/* -------------------------------------------- */}
+      {/* LEVEL FILTER */}
+      {/* -------------------------------------------- */}
+
+      <div className="mb-6 flex gap-6 flex-col sm:flex-row ">
         <div>
-          <p className="text-xs font-medium text-slate-500 mb-1.5">Level</p>
+
+          <p className="text-xs font-medium text-slate-500 mb-1.5">
+            Level
+          </p>
+
           <div className="inline-flex items-center gap-1 bg-slate-100 rounded-lg p-1">
             {["All", ...LEVELS].map((level) => (
               <button
                 key={level}
-                onClick={() => setSelectedLevel(level)}
-                className={`px-3 py-1.5 text-sm rounded-md font-medium transition-colors ${
-                  selectedLevel === level
-                    ? "bg-white text-[#0A2472] shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
-                }`}
+                onClick={() =>
+                  setSelectedLevel(level)
+                }
+                className={`px-3 py-1.5 text-sm rounded-md font-medium transition-colors ${selectedLevel === level
+                  ? "bg-white text-[#0A2472] shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+                  }`}
               >
                 {level}
               </button>
             ))}
           </div>
         </div>
+        <div className="mb-6">
+          <label className="text-xs font-medium text-slate-500 mb-1.5 block">
+            Day
+          </label>
 
-        <div>
-          <p className="text-xs font-medium text-slate-500 mb-1.5">Class</p>
-          <select
-            value={selectedClass}
-            onChange={(e) => setSelectedClass(e.target.value)}
-            disabled={visibleClassrooms.length === 0}
-            className="border border-slate-300 rounded-md px-3 py-2 text-sm outline-none focus:border-[#0A2472] focus:ring-1 focus:ring-[#0A2472]/30 disabled:bg-slate-50 disabled:text-slate-400 min-w-[160px]"
-          >
-            {visibleClassrooms.length === 0 && <option value="">No classes</option>}
-            {visibleClassrooms.map((c) => (
-              <option key={c.id} value={c.id}>
-                {classroomLabel(c)}
-              </option>
-            ))}
-          </select>
+          <div>
+            <select
+              value={selectedDay}
+              onChange={(e) => setSelectedDay(e.target.value)}
+              className="text-sm rounded-md px-3 py-2 bg-slate-100 border border-slate-200"
+            >
+              <option value="All">All</option>
+              {DAYS.map((day) => (
+                <option key={day} value={day}>
+                  {day}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
+
+      {/* -------------------------------------------- */}
+      {/* DAY FILTER (dropdown) */}
+      {/* -------------------------------------------- */}
+
+
+      {/* -------------------------------------------- */}
+      {/* LOADING */}
+      {/* -------------------------------------------- */}
 
       {loading && (
         <div className="flex items-center justify-center py-20 text-slate-400 text-sm">
@@ -198,34 +336,63 @@ export default function TimetablePage() {
         </div>
       )}
 
+      {/* -------------------------------------------- */}
+      {/* ERROR */}
+      {/* -------------------------------------------- */}
+
       {!loading && error && (
         <div className="flex items-center justify-center py-20 text-red-500 text-sm">
           {error}
         </div>
       )}
 
-      {!loading && !error && classrooms.length === 0 && (
-        <div className="flex items-center justify-center py-20 text-slate-400 text-sm">
-          No classes found.
-        </div>
-      )}
+      {/* -------------------------------------------- */}
+      {/* NO CLASSROOMS */}
+      {/* -------------------------------------------- */}
 
-      {!loading && !error && classrooms.length > 0 && !selectedClassroom && (
-        <div className="bg-white border border-slate-200 rounded-lg py-16 text-center text-sm text-slate-400">
-          No classes found for this level.
-        </div>
-      )}
+      {!loading &&
+        !error &&
+        classrooms.length === 0 && (
+          <div className="flex items-center justify-center py-20 text-slate-400 text-sm">
+            No classes found.
+          </div>
+        )}
 
-      {!loading && !error && selectedClassroom && (
-        <TimetableGrid
-          periods={periods}
-          entries={entriesForClass}
-          deletingId={deletingId}
-          onCellClick={openCellModal}
-          onEdit={openEditModal}
-          onDelete={handleDelete}
-        />
-      )}
+      {/* -------------------------------------------- */}
+      {/* NO CLASSROOMS FOR SELECTED LEVEL */}
+      {/* -------------------------------------------- */}
+
+      {!loading &&
+        !error &&
+        classrooms.length > 0 &&
+        visibleClassrooms.length === 0 && (
+          <div className="bg-white border border-slate-200 rounded-lg py-16 text-center text-sm text-slate-400">
+            No classes found for this level.
+          </div>
+        )}
+
+      {/* -------------------------------------------- */}
+      {/* SCHOOL-WIDE TIMETABLE */}
+      {/* -------------------------------------------- */}
+
+      {!loading &&
+        !error &&
+        visibleClassrooms.length > 0 && (
+          <TimetableGrid
+            classrooms={visibleClassrooms}
+            periods={periods}
+            entries={visibleEntries}
+            deletingId={deletingId}
+            onCellClick={openCellModal}
+            onEdit={openEditModal}
+            onDelete={handleDelete}
+            selectedDay={selectedDay}
+          />
+        )}
+
+      {/* -------------------------------------------- */}
+      {/* ADD / EDIT MODAL */}
+      {/* -------------------------------------------- */}
 
       <TimetableFormModal
         open={modalOpen}
@@ -238,6 +405,20 @@ export default function TimetablePage() {
         onClose={closeModal}
         onSaved={handleSaved}
       />
+
+      <PeriodsModal
+        open={periodsModalOpen}
+        onClose={() => setPeriodsModalOpen(false)}
+        periods={periods}
+        onSaved={() => {
+          setPeriodsModalOpen(false);
+          fetchAll();
+        }}
+      />
+
+      {/* -------------------------------------------- */}
+      {/* TOAST */}
+      {/* -------------------------------------------- */}
 
       {toast && (
         <div className="fixed bottom-6 right-6 bg-slate-800 text-white text-sm px-4 py-2.5 rounded-lg shadow-lg z-50">

@@ -27,12 +27,17 @@ export function periodOptionLabel(period) {
 }
 
 export function getStaffFullName(staff) {
-  return `${staff.first_name} ${staff.last_name}`;
+  if (!staff) return "";
+  const first = staff.first_name ?? staff.firstName ?? staff.name ?? staff.full_name ?? "";
+  const last = staff.last_name ?? staff.lastName ?? "";
+  return `${first}${last ? ` ${last}` : ""}`.trim();
 }
 
 // Prefer active teaching staff for the teacher dropdown.
 export function isActiveTeacher(staff) {
-  return staff.role === "Teacher" && staff.status === "Active";
+  const activeFlag =
+    staff.status === "Active" || staff.is_active === true || staff.active === true;
+  return staff.role === "Teacher" && Boolean(activeFlag);
 }
 
 // Best-effort extraction of a human-readable message from a DRF error

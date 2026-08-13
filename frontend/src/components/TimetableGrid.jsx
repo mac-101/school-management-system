@@ -1,117 +1,184 @@
-import { DAYS, formatTime, sortPeriods } from "../utils/timetableHelpers";
+import React, { useMemo } from "react";
+import {
+  DAYS,
+  classroomLabel,
+  classroomSortValue,
+  sortPeriods,
+  formatTime,
+} from "../utils/timetableHelpers";
 
-function PencilIcon() {
-  return (
-    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-    </svg>
-  );
-}
+export default function TimetableGrid({
+  classrooms = [],
+  periods = [],
+  entries = [],
+  onEdit,
+  onDelete,
+  onCellClick,
+  selectedDay = "All",
+}) {
+  const sortedClassrooms = useMemo(() => {
+    return [...classrooms].sort(
+      (a, b) => classroomSortValue(a) - classroomSortValue(b)
+    );
+  }, [classrooms]);
 
-function TrashIcon() {
-  return (
-    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-    </svg>
-  );
-}
+  const sortedPeriods = useMemo(() => {
+    return sortPeriods(periods);
+  }, [periods]);
 
-export default function TimetableGrid({ periods, entries, deletingId, onCellClick, onEdit, onDelete }) {
-  const orderedPeriods = sortPeriods(periods);
+  const daysToShow = selectedDay === "All" ? DAYS : [selectedDay];
 
-  const findEntry = (periodId, day) =>
-    entries.find((e) => e.period === periodId && e.day === day);
+  /*
+   * Fast lookup:
+   *
+   * day + classroom + period
+   *
+   * Example:
+   * Monday-JSS 1-Period 1
+   */
+  const entryMap = useMemo(() => {
+    const map = new Map();
 
-  if (orderedPeriods.length === 0) {
+    for (const entry of entries) {
+      const key = `${entry.day}-${entry.classroom}-${entry.period}`;
+      map.set(key, entry);
+    }
+
+    return map;
+  }, [entries]);
+
+  const getEntry = (day, classroomId, periodId) => {
+    return entryMap.get(`${day}-${classroomId}-${periodId}`);
+  };
+
+  if (!sortedClassrooms.length) {
     return (
-      <div className="bg-white border border-slate-200 rounded-lg py-16 text-center text-sm text-slate-400">
-        No periods have been set up yet.
+      <div className="rounded-xl border border-slate-200 bg-white p-10 text-center">
+        <p className="text-sm text-slate-500">
+          No classrooms available.
+        </p>
+      </div>
+    );
+  }
+
+  if (!sortedPeriods.length) {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white p-10 text-center">
+        <p className="text-sm text-slate-500">
+          No periods have been configured.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-lg overflow-x-auto">
-      <table className="w-full text-sm border-collapse">
-        <thead>
-          <tr className="border-b border-slate-200">
-            <th className="text-left text-slate-500 font-medium px-4 py-3 w-40 whitespace-nowrap">
-              Period
-            </th>
-            {DAYS.map((day) => (
-              <th
-                key={day}
-                className="text-left text-slate-500 font-medium px-4 py-3 whitespace-nowrap"
-              >
-                {day}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {orderedPeriods.map((period) => (
-            <tr key={period.id} className="border-b border-slate-100 last:border-b-0">
-              <td className="px-4 py-3 align-top">
-                <p className="font-medium text-slate-800">{period.name}</p>
-                <p className="text-xs text-slate-400">
-                  {formatTime(period.start_time)} - {formatTime(period.end_time)}
-                </p>
-              </td>
+    <div className="space-y-8">
+      {daysToShow.map((day) => (
+        <section key={day}>
+          {/* Day heading */}
+          <div className="mb-3">
+            <h2 className="text-base font-semibold text-slate-800">
+              {day}
+            </h2>
+          </div>
 
-              {DAYS.map((day) => {
-                const entry = findEntry(period.id, day);
-                const isDeleting = entry && entry.id === deletingId;
-                return (
-                  <td key={day} className="px-2 py-2 align-top">
-                    {entry ? (
-                      <div
-                        className={`group relative bg-[#0A2472]/5 border border-[#0A2472]/10 rounded-lg px-3 py-2 min-w-[140px] ${
-                          isDeleting ? "opacity-40" : ""
-                        }`}
-                      >
-                        <p className="text-sm font-medium text-slate-800 truncate">
-                          {entry.subject_name}
-                        </p>
-                        <p className="text-xs text-slate-500 truncate">{entry.teacher_name}</p>
-                        {entry.room && (
-                          <p className="text-xs text-slate-400 truncate">Room {entry.room}</p>
-                        )}
+          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+            <table className="w-full min-w-[900px] border-collapse">
+              <thead>
+                <tr className="bg-slate-50">
+                  {/* Classroom column */}
+                  <th className="sticky left-0 z-10 w-28 min-w-28 border-b border-r border-slate-200 bg-slate-50 px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Class
+                  </th>
 
-                        <div className="hidden group-hover:flex items-center gap-2 absolute top-1.5 right-1.5 bg-white border border-slate-200 rounded-md px-1 py-0.5 shadow-sm">
-                          <button
-                            onClick={() => onEdit(entry)}
-                            disabled={isDeleting}
-                            className="text-slate-500 hover:text-[#0A2472] p-0.5 disabled:opacity-50"
-                            title="Edit"
-                          >
-                            <PencilIcon />
-                          </button>
-                          <button
-                            onClick={() => onDelete(entry)}
-                            disabled={isDeleting}
-                            className="text-slate-500 hover:text-red-600 p-0.5 disabled:opacity-50"
-                            title="Delete"
-                          >
-                            <TrashIcon />
-                          </button>
-                        </div>
+                  {/* Period columns */}
+                  {sortedPeriods.map((period) => (
+                    <th
+                      key={period.id}
+                      className="border-b border-r border-slate-200 px-3 py-3 text-center last:border-r-0"
+                    >
+                      <div className="text-xs font-semibold text-slate-700">
+                        {period.name}
                       </div>
-                    ) : (
-                      <button
-                        onClick={() => onCellClick(day, period.id)}
-                        className="w-full h-full min-h-[52px] min-w-[140px] flex items-center justify-center text-slate-300 hover:text-[#0A2472] hover:bg-slate-50 rounded-lg text-sm"
-                        title="Add entry"
-                      >
-                        —
-                      </button>
-                    )}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+
+                      <div className="mt-1 text-[11px] font-normal text-slate-400">
+                        {formatTime(period.start_time)} -{" "}
+                        {formatTime(period.end_time)}
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+
+              <tbody>
+                {sortedClassrooms.map((classroom) => (
+                  <tr
+                    key={classroom.id}
+                    className="hover:bg-slate-50/50"
+                  >
+                    {/* Classroom */}
+                    <th className="sticky left-0 z-10 border-b border-r border-slate-200 bg-white px-3 py-4 text-left text-sm font-semibold text-slate-700">
+                      {classroomLabel(classroom)}
+                    </th>
+
+                    {/* Periods */}
+                    {sortedPeriods.map((period) => {
+                      const entry = getEntry(
+                        day,
+                        classroom.id,
+                        period.id
+                      );
+
+                      return (
+                        <td
+                          key={period.id}
+                          className="border-b border-r border-slate-200 p-1 last:border-r-0"
+                        >
+                          {entry ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (onEdit) {
+                                  onEdit(entry);
+                                  return;
+                                }
+
+                                if (onCellClick) {
+                                  onCellClick(entry.classroom ? entry.classroom : entry, entry.day, entry.period);
+                                }
+                              }}
+                              className="flex min-h-[64px] w-full items-center justify-center rounded-lg px-2 py-3 text-center transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0A2472]/30"
+                            >
+                              <span className="text-sm font-medium text-slate-800">
+                                {entry.subject_name}
+                              </span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (onCellClick) {
+                                  onCellClick(classroom, day, period.id);
+                                }
+                              }}
+                              className="min-h-[64px] w-full rounded-lg text-slate-300 transition hover:bg-slate-50 hover:text-slate-400"
+                              aria-label={`Add ${day} ${classroomLabel(
+                                classroom
+                              )} ${period.name}`}
+                            >
+                              <span className="text-xs">—</span>
+                            </button>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ))}
     </div>
   );
 }
