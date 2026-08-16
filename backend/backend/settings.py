@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'staff',
     'scheme',
     'timetable',
+    'results',
     
 ]
 

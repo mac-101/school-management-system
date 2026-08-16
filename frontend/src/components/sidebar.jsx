@@ -6,6 +6,7 @@ const navItems = [
   { label: "Staff", path: "/staff" },
   { label: "Timetable", path: "/timetable" },
   { label: "Schemes", path: "/schemes" },
+  { label: "Results", path: "/results" },
 ];
 
 export default function Sidebar() {

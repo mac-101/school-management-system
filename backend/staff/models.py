@@ -71,6 +71,36 @@ class Subject(models.Model):
     def __str__(self):
         return self.name
     
+class SubjectLevel(models.Model):
+
+    LEVEL_CHOICES = [
+        ("Primary", "Primary"),
+        ("JSS", "JSS"),
+        ("SSS", "SSS"),
+    ]
+
+    subject = models.ForeignKey(
+        Subject,
+        on_delete=models.CASCADE,
+        related_name="levels"
+    )
+
+    level = models.CharField(
+        max_length=20,
+        choices=LEVEL_CHOICES
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subject", "level"],
+                name="unique_subject_level"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.subject} - {self.level}"
+    
 
 class TeachingAssignment(models.Model):
 

@@ -15,12 +15,12 @@ export default function StudentTable({ students, onEdit, onDelete }) {
         <thead>
           <tr className="text-left text-slate-500 border-b border-slate-200">
             <th className="py-3 px-4 font-medium">Name</th>
-            <th className="py-3 px-4 font-medium">Age</th>
+            {/* <th className="py-3 px-4 font-medium">Age</th> */}
             <th className="py-3 px-4 font-medium">Gender</th>
-            <th className="py-3 px-4 font-medium">Level</th>
-            <th className="py-3 px-4 font-medium">Grade</th>
-            <th className="py-3 px-4 font-medium">Student Fee</th>
-            <th className="py-3 px-4 font-medium">Amount Paid</th>
+            <th className="py-3 px-4 font-medium">Class</th>
+            <th className="py-3 px-4 font-medium">Student ID</th>
+            {/* <th className="py-3 px-4 font-medium">Student Fee</th> */}
+            {/* <th className="py-3 px-4 font-medium">Amount Paid</th> */}
             <th className="py-3 px-4 font-medium">Balance</th>
             <th className="py-3 px-4 font-medium text-right">Actions</th>
           </tr>
